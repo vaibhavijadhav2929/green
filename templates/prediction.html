@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image - GreenClassify v2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: white;
+            padding: 30px 25px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 550px;
+            width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            background: #f8f9ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e8ecff;
+            border-color: #764ba2;
+        }
+
+        .upload-area h3 {
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+
+        .upload-area p {
+            font-size: 0.85em;
+            margin: 4px 0;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .preview-container {
+            text-align: center;
+            margin: 15px 0;
+            display: none;
+        }
+
+        #preview {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .file-info {
+            text-align: center;
+            color: #666;
+            margin: 12px 0;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+                max-height: 98vh;
+            }
+
+            h1 {
+                font-size: 1.3em;
+                margin-bottom: 20px;
+            }
+
+            .upload-area {
+                padding: 30px 10px;
+                margin-bottom: 15px;
+            }
+
+            .upload-icon {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+            }
+
+            .upload-area h3 {
+                font-size: 0.95em;
+            }
+
+            .upload-area p {
+                font-size: 0.8em;
+            }
+
+            .btn {
+                padding: 12px;
+                font-size: 1em;
+            }
+
+            #preview {
+                max-height: 200px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                margin-bottom: 15px;
+                font-size: 1.3em;
+            }
+
+            .upload-area {
+                padding: 25px 10px;
+                margin-bottom: 15px;
+            }
+
+            .upload-icon {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+            }
+
+            #preview {
+                max-height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📷 Upload Vegetable Image</h1>
+        
+        <form id="uploadForm" action="{{ url_for('predict') }}" method="POST" enctype="multipart/form-data">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <h3>Click to upload or drag and drop</h3>
+                <p>Supported formats: JPG, PNG, JPEG, BMP, GIF, WEBP</p>
+                <p>Maximum size: 16MB</p>
+                <input type="file" name="file" id="fileInput" accept="image/*" required>
+            </div>
+
+            <div class="preview-container" id="previewContainer">
+                <img id="preview" alt="Preview">
+                <div class="file-info" id="fileInfo"></div>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn" disabled>Classify Vegetable</button>
+        </form>
+        
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const previewContainer = document.getElementById('previewContainer');
+        const fileInfo = document.getElementById('fileInfo');
+        const submitBtn = document.getElementById('submitBtn');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                    submitBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>

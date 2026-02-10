@@ -1,0 +1,43 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Flask
+instance/
+.webassets-cache
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Model files (large)
+*.h5
+*.keras
+
+# Backup files
+backup/
+
+# Dataset (large)
+Vegetable_Dataset/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
